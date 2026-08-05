@@ -3,6 +3,7 @@ import { getSimilarAudioTracks } from './providers'
 
 export default function MultipartForm() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [recomendations, setRecomendations] = useState([]);
   const [status, setStatus] = useState('idle');
 
   const handleFileChange = (event) => {
@@ -17,7 +18,7 @@ export default function MultipartForm() {
 
     console.log(selectedFile)
     if (!selectedFile) {
-      alert('Por favor, selecciona un archivo.');
+      alert('Please, choose a audio track.');
       return;
     }
 
@@ -30,6 +31,9 @@ export default function MultipartForm() {
     try {
       const response = await getSimilarAudioTracks(formData, { signal: controller?.signal });
 
+      setRecomendations(response);
+
+      setStatus('idle');
     } catch (error) {
       console.error('Error sending audio track:', error);
       setStatus('error');
@@ -59,15 +63,16 @@ export default function MultipartForm() {
           </div>
         )}
 
-        {/* Botón de envío */}
         <button 
           type="submit" 
           disabled={status === 'loading'}
           className="file-submit"
         >
-          {status === 'loading' ? 'Searching for similar audio tracks...' : ''}
+          {status === 'loading' ? 'Searching for similar audio tracks...' : 'Search for similar audio tracks'}
         </button>
       </form>
+
+      {recomendations && (<ul>{recomendations.map(recomendation => <li>{recomendation}</li>)}</ul>)}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import os
 import io
 import torch
 import torchaudio
+import soundfile as sf
 from pinecone import Pinecone
 from transformers import AutoModel, Wav2Vec2FeatureExtractor
 
@@ -66,7 +67,10 @@ def audio_embeddings(chunks):
 
 async def audio_track_similaries(audio_track):
   audio_bytes = await audio_track.read()
-  wav, sr = torchaudio.load(io.BytesIO(audio_bytes))
+  data, sr = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+  wav = torch.from_numpy(data).T
+  if wav.ndim == 1:
+      wav = wav.unsqueeze(0)
   wav = wav.mean(dim=0)
   track_chunks = chunk_audio_file(wav, audio_sample_rate=sr)
   track_emb = audio_embeddings(track_chunks)
@@ -77,5 +81,5 @@ async def audio_track_similaries(audio_track):
       namespace=PINECONE_NAMESPACE,
       include_metadata=True,
   )
-  print(response)
-  return response
+  print(response["matches"])
+  return [match.get("metadata", {}).get("path", "") for match in response["matches"]]

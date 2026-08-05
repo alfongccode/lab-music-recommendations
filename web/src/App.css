@@ -4,6 +4,8 @@
 }
 
 .form-container {
+  display: flex;
+  gap: 12px;
   margin-bottom: 15px;
 }
 
