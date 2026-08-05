@@ -82,4 +82,4 @@ async def audio_track_similaries(audio_track):
       include_metadata=True,
   )
   print(response["matches"])
-  return [match.get("metadata", {}).get("path", "") for match in response["matches"]]
+  return [ { "filename": match.metadata.get("path", ""), "score": match.score } for match in response["matches"] if match.metadata.get("filename", "") != getattr(audio_track, "filename", "") ]
